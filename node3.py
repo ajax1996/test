@@ -35,10 +35,8 @@ class Blockchain:
             'Hash' : hashlib.sha256((str(blockNo)+str(nonce)+data+str(prevhash)+str(time.time())).encode()).hexdigest(),
         }
 
-        # Connecting to Ganache
         self.w3 = Web3(Web3.HTTPProvider("http://127.0.0.1:7545"))
-        self.chain_id = 1337
-        self.chain=[]#self.getChain()
+        self.chain=[]
         self.chain.append(genesis)
         self.transactions = []
         self.nodes = NODES
@@ -49,28 +47,6 @@ class Blockchain:
         self.blockCreation = []
         self.chainUpdated=False
 
-
-    def add_node(self,address):
-        node_address = urlparse(address)
-        addr = str(node_address.netloc)
-        self.nodes[addr] = 0x0
-        self.setAccountId(addr)
-
-
-    def getChain(self):
-        chain = []
-        latest_block_number = self.w3.eth.get_block('latest')['number']
-        earliest_block_number = self.w3.eth.get_block('earliest')['number']
-        for i in range(earliest_block_number, latest_block_number+1):
-            chain.append(self.w3.eth.get_block(i))
-        return chain
-    
-
-    def transact2(self, signed_txn):
-        txn_hash = self.w3.eth.send_raw_transaction(signed_txn.rawTransaction)
-        tx_receipt = self.w3.eth.wait_for_transaction_receipt(txn_hash)
-        return tx_receipt
-    
 
     def create_block(self):
         blockNo = len(self.chain)
@@ -312,12 +288,6 @@ def App():
 
 bc = Blockchain()
 if __name__ == "__main__":
-    # manager = multiprocessing.Manager()
-    # bc.blockCreation = manager.list()
-    # bc.blockCreation.append(1)
-    # flag = bc.blockCreation
-    #consensus_process = multiprocessing.Process(target=Consensus)
-    #BWAProcess = multiprocessing.Process(target=BWA)
     blockCreationProcess = multiprocessing.Process(target=CreateBlock)
     appProcess = multiprocessing.Process(target=App)
     #consensus_process.start()
@@ -327,4 +297,3 @@ if __name__ == "__main__":
     #consensus_process.join()
     blockCreationProcess.join()
     appProcess.join()
-    #BWAProcess.join()
